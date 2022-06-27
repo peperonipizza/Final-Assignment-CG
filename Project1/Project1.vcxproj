@@ -139,6 +139,7 @@
     <ClInclude Include="texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="todo.txt" />
     <Text Include="vertexshader.vsh">
       <FileType>Document</FileType>
     </Text>

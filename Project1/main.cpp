@@ -37,14 +37,28 @@ struct Material {
 	float power;
 };
 
+
+// Const int count objects
+constexpr int objectnr = 3;
+
+// Ground vectors
+vector<vector<GLfloat> > ground_vertices{
+   {-10, -0.1, 50},
+   {10, -0.1, 50},
+   {-10, -0.1, -300},
+   {10, -0.1, -300} };
+
+
 //--------------------------------------------------------------------------------
 // Variables
 //--------------------------------------------------------------------------------
 
+
 // ID's
 GLuint program_id;
-GLuint texture_id[2];
-GLuint vao[2];
+GLuint texture_id[objectnr];
+GLuint vao[objectnr];
+
 
 // Uniform ID's
 GLuint uniform_mv;
@@ -54,16 +68,18 @@ GLuint uniform_material_specular;
 GLuint uniform_material_power;
 GLuint uniform_light_pos;
 
+
 // Matrices
-glm::mat4 model[2], view, projection;
-glm::mat4 mv[2];
+glm::mat4 model[objectnr], view, projection;
+glm::mat4 mv[objectnr];
 
 LightSource light;
-Material material[2];
+Material material[objectnr];
 
-vector<glm::vec3> normals[2];
-vector<glm::vec3> vertices[2];
-vector<glm::vec2> uvs[2];
+vector<glm::vec3> normals[objectnr];
+vector<glm::vec3> vertices[objectnr];
+vector<glm::vec2> uvs[objectnr];
+
 
 // Camera movement
 glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 10.0f);
@@ -92,17 +108,23 @@ void Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Transformation
-	model[0] = glm::rotate(model[0], 0.01f, glm::vec3(0.0f, 1.0f, 0.0f));
-	model[1] = glm::rotate(model[1], 0.01f, glm::vec3(0.0f, 1.0f, 0.0f));
+	// TODO: fix that rotate + translate works
+	model[0] = glm::translate(glm::mat4(1.0f), glm::vec3(-4.0f, 1.0f, 0.0f));
+	model[1] = glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 0.0f, 3.0f));
+	model[2] = glm::translate(glm::mat4(1.0f), glm::vec3(-0.56f, 2.50f, 5.00f));
 
-	//model[1] = glm::translate(model[1], glm::vec3(0.0f, 0.0f, 0.0f));
+	// rotate die shit broer
 
-	model[1] = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f));
+	//model[0] = glm::rotate(model[0], 0.01f, glm::vec3(0.0f, 1.0f, 0.0f));
+	//model[1] = glm::rotate(model[1], 0.01f, glm::vec3(0.0f, 1.0f, 0.0f));
+	
+
+	
 
 	// Attach to program_id
 	glUseProgram(program_id);
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < objectnr; i++)
 	{
 		mv[i] = view * model[i];
 
@@ -111,7 +133,7 @@ void Render()
 
 		// Bind texture
 		glBindTexture(GL_TEXTURE_2D, texture_id[i]);
-
+		
 		glUniform3fv(uniform_light_pos, 1, glm::value_ptr(light.position));
 		glUniform3fv(uniform_material_ambient, 1, glm::value_ptr(material[i].ambient_color));
 		glUniform3fv(uniform_material_diffuse, 1, glm::value_ptr(material[i].diffuse_color));
@@ -182,7 +204,7 @@ void InitShaders()
 void InitMatrices()
 {
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < objectnr; i++)
 	{
 		model[i] = glm::mat4(1.0f);
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -198,9 +220,10 @@ void InitMatrices()
 void InitObjects() {
 	bool res = loadOBJ("teapot.obj", vertices[0], uvs[0], normals[0]);
 	bool res1 = loadOBJ("torus.obj", vertices[1], uvs[1], normals[1]);
-
+	bool res2 = loadOBJ("box.obj", vertices[2], uvs[2], normals[2]);
 	texture_id[0] = loadBMP("Textures/Yellobrk.bmp");
 	texture_id[1] = loadBMP("Textures/uvtemplate.bmp");
+	texture_id[2] = loadBMP("Textures/Yellobrk.bmp");
 }
 
 void InitMaterialLight() {
@@ -214,6 +237,11 @@ void InitMaterialLight() {
 	material[1].diffuse_color = glm::vec3(0.5, 0.5, 0.3);
 	material[1].specular = glm::vec3(1.0);
 	material[1].power = 4;
+
+	material[2].ambient_color = glm::vec3(0.2, 0.2, 0.1);
+	material[2].diffuse_color = glm::vec3(0.5, 0.5, 0.3);
+	material[2].specular = glm::vec3(1.0);
+	material[2].power = 4;
 }
 //------------------------------------------------------------
 // void InitBuffers()
@@ -247,7 +275,7 @@ void InitBuffers()
 	GLuint uniform_material_power = glGetUniformLocation(
 		program_id, "mat_power");
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < objectnr; i++)
 	{
 		// vbo for normals
 		glGenBuffers(1, &vbo_normals);

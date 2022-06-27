@@ -1,0 +1,6 @@
+- bedenken wat ik ga maken
+- bewegen(d leren) 
+- grond toevoegen
+- skybox maken
+- items  toevoegen (modulair)
+- rotations
